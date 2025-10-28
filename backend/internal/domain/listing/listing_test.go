@@ -22,7 +22,7 @@ func TestListingCreation(t *testing.T) {
 		ZipCode:      "97201",
 		StartDate:    now,
 		EndDate:      now.Add(24 * time.Hour),
-		SaleType:     "estate_sale",
+		EventType:     "estate_sale",
 		Status:       "active",
 		ViewCount:    0,
 		Featured:     false,
@@ -68,14 +68,14 @@ func TestExternalListing(t *testing.T) {
 func TestListingImage(t *testing.T) {
 	img := ListingImage{
 		ID:           1,
-		SaleID:       100,
+		ListingID:    100,
 		ImageURL:     "https://example.com/photo.jpg",
 		IsPrimary:    true,
 		DisplayOrder: 1,
 		UploadedAt:   time.Now(),
 	}
 
-	assert.Equal(t, 100, img.SaleID)
+	assert.Equal(t, 100, img.ListingID)
 	assert.True(t, img.IsPrimary)
 	assert.Equal(t, "https://example.com/photo.jpg", img.ImageURL)
 }
@@ -86,7 +86,7 @@ func TestListingFilters(t *testing.T) {
 	filters := ListingFilters{
 		City:     "Portland",
 		State:    "OR",
-		SaleType: "estate_sale",
+		EventType: "estate_sale",
 		Status:   "active",
 		Featured: &featured,
 		Limit:    20,
@@ -229,7 +229,7 @@ func TestAggregatedListing(t *testing.T) {
 		Longitude:    &lng,
 		StartDate:    now,
 		EndDate:      now.Add(24 * time.Hour),
-		SaleType:     "estate_sale",
+		EventType:     "estate_sale",
 		Status:       "active",
 		ViewCount:    10,
 		Images: []ListingImage{
@@ -249,7 +249,7 @@ func TestAggregatedListing(t *testing.T) {
 	assert.False(t, aggregated.IsScraped)
 	assert.Equal(t, "Owned Sale", aggregated.Title)
 	assert.Equal(t, "100 Main St, Apt 2B", aggregated.Address)
-	assert.Equal(t, "estate_sale", aggregated.SaleType)
+	assert.Equal(t, "estate_sale", aggregated.EventType)
 	assert.Equal(t, "active", aggregated.Status)
 	assert.Equal(t, 10, aggregated.ViewCount)
 	assert.Len(t, aggregated.ImageURLs, 2)

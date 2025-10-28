@@ -34,10 +34,10 @@ type Listing struct {
 	// Sale dates/times
 	StartDate time.Time `json:"start_date"`
 	EndDate   time.Time `json:"end_date"`
-	SaleHours *string   `json:"sale_hours,omitempty"` // e.g., "Fri 9am-5pm, Sat 9am-3pm"
+	EventHours *string   `json:"event_hours,omitempty"` // e.g., "Fri 9am-5pm, Sat 9am-3pm"
 
 	// Owned-only fields (NULL for external)
-	SaleType      string   `json:"sale_type,omitempty"`      // 'estate_sale', 'auction', 'moving_sale'
+	EventType      string   `json:"event_type,omitempty"`      // 'estate_sale', 'auction', 'moving_sale'
 	Status        string   `json:"status,omitempty"`         // 'draft', 'published', 'completed', 'cancelled'
 	ListingTier   string   `json:"listing_tier,omitempty"`   // 'basic', 'featured', 'premium'
 	PaymentStatus string   `json:"payment_status,omitempty"` // 'unpaid', 'paid', 'refunded'
@@ -66,7 +66,7 @@ func (l *Listing) IsOwned() bool {
 // ListingImage represents an image associated with a listing
 type ListingImage struct {
 	ID           int       `json:"id"`
-	SaleID       int       `json:"sale_id"`
+	ListingID    int       `json:"listing_id" db:"listing_id"`
 	ImageURL     string    `json:"image_url"`
 	ThumbnailURL *string   `json:"thumbnail_url,omitempty"`
 	IsPrimary    bool      `json:"is_primary"`
@@ -79,7 +79,7 @@ type ListingFilters struct {
 	City      string
 	State     string
 	ZipCode   string
-	SaleType  string // 'estate_sale', 'auction', 'moving_sale'
+	EventType  string // 'estate_sale', 'auction', 'moving_sale'
 	Status    string // Only 'published' for public, all for sellers
 	StartDate *time.Time
 	EndDate   *time.Time

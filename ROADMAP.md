@@ -1,466 +1,171 @@
-# EstateSaleFinder.org - Development Roadmap
+# EstateSaleFinder.ai - Development Roadmap
 
-> **UPDATED STRATEGY:** Smart Aggregator → Marketplace Platform → Category Leader
+## ✅ Completed
 
-**Success Probability: 15-25%** (realistic VC assessment)
-**Key Risk: Traffic acquisition & first 100 sellers**
-**Mitigation: Start with aggregation, validate locally, scale regionally**
-
----
-
-## Table of Contents
-1. [Vision & Strategy](#vision--strategy)
-2. [90-Day Validation Plan](#90-day-validation-plan)
-3. [Technical Roadmap](#technical-roadmap)
-4. [Growth Strategy](#growth-strategy)
-5. [Success Metrics](#success-metrics)
-6. [Risk Mitigation](#risk-mitigation)
+### Phase 1: Refactoring & Foundation
+- [x] Complete Sale → Listing terminology refactoring
+- [x] Database schema updates (sale_type → event_type, sale_hours → event_hours)
+- [x] All table renames (sale_images → listing_images, etc.)
+- [x] Repository & Service layer renames
+- [x] Integration tests passing (12/12 tests)
+- [x] Backend compiles successfully
+- [x] API working with Docker Compose stack
 
 ---
 
-## Vision & Strategy
+## 🎯 Next Steps (Immediate Priority)
 
-### What We're Building
+### Phase 2: Fix & Polish
+1. ~~**Fix Scraper Integration Test Failures**~~ ✅ **COMPLETED**
+   - ~~Issue: Expecting 9 listings but getting 4~~
+   - ~~Need to investigate PostgreSQL data persistence~~
+   - **Resolution**: Tests were hardcoding expectations. The scraper correctly persists all 9 listings across multiple cities in the Portland metro area (Portland, Beaverton, Gresham, etc.). Modified tests to dynamically verify that scraped count matches database count and understand that `GetListingsByLocation("Portland", "OR")` returns only listings with city="Portland", not all metro area listings.
+   - All 6 scraper integration tests now passing ✅
 
-**PRIMARY:** EstateSaleFinder.org - Estate Sale Marketplace Platform
-**SECONDARY:** ListingAI - AI-powered listing automation (dogfooded through estate sales, then extracted as standalone SaaS)
+2. **Update Frontend to Use New API Structure**
+   - Update frontend types to match backend (event_type, event_hours)
+   - Verify frontend still works with refactored backend
 
-**The Dogfooding Strategy:**
-1. Build estate sale marketplace with AI listing creator built-in
-2. Estate sale companies love the AI feature (saves them hours)
-3. Extract AI listing feature as standalone product (ListingAI)
-4. Sell ListingAI to broader market (eBay sellers, Etsy sellers, thrift stores)
-5. Two revenue streams: Marketplace fees + SaaS subscriptions
-
-**Three User Types (EstateSaleFinder.org):**
-1. **Buyers** - Discover sales, bid on items, find treasures
-2. **Individual Sellers** - List collectibles, run auctions, build shops
-3. **Estate Sale Companies** - Manage events, list inventory, get analytics (become ListingAI customers)
-
-**Business Model:**
-- Freemium subscriptions ($9-29/mo for sellers)
-- Transaction fees (5-10% commission on sales)
-- Premium features (analytics, featured placement, white-label)
-
-**Competitive Positioning:**
-
-| Site | Monthly Visits | Weakness | Our Advantage |
-|------|---------------|----------|---------------|
-| estatesales.net | 7.1M | 2000s UX, no AI | Modern UX, AI-first |
-| estatesales.org | 950K | Clunky, high fees | Lower fees, better mobile |
-| eBay | 1B+ | Generic, 13% fees | Specialized, 5-10% fees |
+3. **Environment Setup Documentation**
+   - Update GETTING_STARTED.md with current structure
+   - Document Docker setup vs local setup
 
 ---
 
-## 90-Day Validation Plan
+## 📋 Feature Development Pipeline
 
-**GOAL: Get 100 active sellers by Day 90**
-**If we hit this: We have product-market fit**
-**If we don't: Kill or pivot**
+### Phase 3: Core Features (High Priority)
 
-### Month 1: Build & Launch (Days 1-30)
+#### User Authentication & Profiles
+- [ ] Complete Firebase authentication flow
+- [ ] User registration/login UI
+- [ ] User profile management
+- [ ] Role-based access (buyers, sellers, professionals)
 
-**Week 1-2: MVP Development**
-- [x] Database schema (sales, items, bids, shops)
-- [ ] Web scraper (estatesales.org, estatesale-finder.com)
-- [ ] Instagram-style feed UI
-- [ ] Basic auction functionality (no payments yet)
-- [ ] User accounts + Firebase auth
+#### Listing Management (Sellers)
+- [ ] Create listing form with image upload
+- [ ] Edit/delete own listings
+- [ ] Listing status management (draft → published)
+- [ ] Image management (upload, reorder, set primary)
+- [ ] Payment integration for featured listings
 
-**Deliverable:** estatesalefinder.org launches with 10K+ aggregated listings
-
-**Week 3-4: AI Features**
-- [ ] GPT-4 Vision item listing creator
-- [ ] Natural language search
-- [ ] AI-generated descriptions for scraped items
-- [ ] Chat interface for sellers
-
-**Deliverable:** Sellers can list items in 2 minutes via AI chat
-
-### Month 2: Manual Validation (Days 31-60)
-
-**Goal: Get first 10 sellers, validate transactions**
-
-**Week 5-6: Manual Seller Acquisition**
-- [ ] Post on Craigslist: "Sell collectibles online - Free for 3 months"
-- [ ] Facebook groups: Estate sale professionals, vintage dealers
-- [ ] Cold email: eBay sellers (pitch lower fees)
-- [ ] Local Portland antique shops (in-person pitch)
-
-**Success Criteria:**
-- ✅ 10 sellers sign up
-- ✅ 50+ items listed
-- ✅ At least 5 sellers use AI listing creator
-
-**Week 7-8: Transaction Validation**
-- [ ] Stripe Connect integration (5% commission)
-- [ ] Bidding system with real-time updates
-- [ ] Email notifications (outbid, won, sold)
-- [ ] Seller dashboard (active, sold, earnings)
-
-**Success Criteria:**
-- ✅ At least 10 transactions complete
-- ✅ Sellers withdraw earnings successfully
-- ✅ 80%+ seller satisfaction (survey)
-
-**CHECKPOINT:** If transactions work and sellers are happy → Continue
-**If not → Pivot or kill**
-
-### Month 3: Local Growth (Days 61-90)
-
-**Goal: 50 sellers in Portland area, then expand**
-
-**Week 9-10: Portland Launch**
-- [ ] SEO optimization ("estate sales Portland", "sell antiques Portland")
-- [ ] Partner with 3-5 local estate sale companies
-- [ ] Local press release (Portland Business Journal)
-- [ ] Instagram/TikTok content (treasure finds, seller stories)
-
-**Week 11-12: Regional Expansion**
-- [ ] Expand to Seattle, Boise, Eugene
-- [ ] Paid ads ($1K-3K budget) - Google, Facebook
-- [ ] Referral program (10% commission bonus for referrals)
-- [ ] Seller success stories (case studies)
-
-**GOAL: 100 active sellers by Day 90**
-
-**Validation Metrics:**
-- Total sellers: 100+
-- Monthly GMV (Gross Merchandise Value): $50K+
-- Active listings: 500+
-- Transactions/month: 100+
-- Seller retention: 70%+ month-over-month
-
-**If we hit these → Raise angel round or continue bootstrapping**
-**If we don't → Assess and pivot**
+#### Search & Discovery (Buyers)
+- [ ] Advanced search filters (location, date range, sale type)
+- [ ] Map view integration (Google Maps)
+- [ ] Save favorite listings
+- [ ] Get notifications for saved searches
 
 ---
 
-## Technical Roadmap
+### Phase 4: Enhanced Features
 
-### Phase 1: MVP (Weeks 1-4)
+#### Scraping & Aggregation
+- [ ] Add more scraper sources (beyond EstateSale-Finder)
+- [ ] Improve deduplication logic
+- [ ] Automatic geocoding for addresses
+- [ ] Image extraction from external sources
 
-**Backend (Go + PostgreSQL)**
-- [x] User authentication (Firebase)
-- [x] Sale listings CRUD
-- [ ] Auction items CRUD
-- [ ] Bidding system
-- [ ] Web scraping service
-- [ ] Geocoding service (addresses → lat/lng)
+#### Professional Services
+- [ ] Professional directory (estate sale companies)
+- [ ] Review & rating system
+- [ ] Professional profiles with portfolios
+- [ ] Contact/booking system
 
-**Frontend (Next.js 14 + Tailwind)**
-- [x] Homepage with hero
-- [x] Sales listing page (grid view)
-- [x] Sale detail page
-- [ ] Instagram-style feed (infinite scroll)
-- [ ] Auction item detail with bidding
-- [ ] User dashboard
-- [ ] Seller shop pages
-
-**Infrastructure**
-- [x] Docker setup (postgres, backend, frontend)
-- [ ] Deployment (Vercel frontend, Railway backend)
-- [ ] CDN for images (Cloudflare)
-- [ ] Monitoring (Sentry, PostHog)
-
-### Phase 2: Marketplace (Weeks 5-8)
-
-**Payments & Transactions**
-- [ ] Stripe Connect (marketplace payments)
-- [ ] Commission calculation (5-10% based on tier)
-- [ ] Payout system (sellers withdraw earnings)
-- [ ] Transaction history & receipts
-
-**Seller Features**
-- [ ] Seller shops (storefronts like "nopa-trucking-llc")
-- [ ] AI listing creator (GPT-4 Vision)
-- [ ] Bulk upload (CSV import)
-- [ ] Inventory management
-- [ ] Analytics dashboard
-
-**Buyer Features**
-- [ ] Save/favorite items
-- [ ] Bidding with email notifications
-- [ ] Follow sellers/shops
-- [ ] Purchase history
-- [ ] Messaging (buyer ↔ seller)
-
-### Phase 3: AI & Discovery (Weeks 9-12)
-
-**AI Features**
-- [ ] Natural language search ("vintage china this Saturday")
-- [ ] GPT-4 Vision item analysis (auto-categorize, price suggestions)
-- [ ] AI route planner (multi-sale optimization)
-- [ ] Smart recommendations ("You might like...")
-- [ ] Fraud detection (AI flags suspicious listings)
-
-**Discovery Features**
-- [ ] Leaflet + OpenStreetMap integration
-- [ ] Map/list toggle (Airbnb-style)
-- [ ] Geolocation detection ("Sales near you")
-- [ ] Category browsing (coins, jewelry, furniture, etc.)
-- [ ] Trending items
-
-**Mobile**
-- [ ] PWA (installable web app)
-- [ ] Push notifications (outbid, won, new sales nearby)
-- [ ] Offline saved items
-- [ ] Mobile-optimized bidding
-
-### Phase 4: Scale (Weeks 13-16)
-
-**Growth**
-- [ ] SEO (1000+ city landing pages auto-generated)
-- [ ] Email marketing (weekly digest)
-- [ ] SMS alerts (auction ending soon)
-- [ ] Referral program (viral loop)
-- [ ] Affiliate program (bloggers, influencers)
-
-**Platform**
-- [ ] White-label for estate sale companies ($99/mo)
-- [ ] API for developers
-- [ ] Zapier integration
-- [ ] Reviews & ratings
-- [ ] Dispute resolution system
-
-**Operations**
-- [ ] Customer support (Intercom)
-- [ ] Fraud prevention
-- [ ] Content moderation (AI + manual)
-- [ ] Legal (ToS, DMCA, privacy policy)
+#### Social Features
+- [ ] Share listings on social media
+- [ ] Email alerts for new listings
+- [ ] User reviews for listings
+- [ ] Report inappropriate listings
 
 ---
 
-## Growth Strategy
+### Phase 5: Monetization
 
-### Traffic Acquisition (Solve Chicken-Egg Problem)
+#### Premium Features
+- [ ] Featured listing tiers (basic, featured, premium)
+- [ ] Stripe payment integration
+- [ ] Subscription plans for professionals
+- [ ] Analytics dashboard for sellers
 
-**Phase 1: Aggregation (Instant Inventory)**
-- Scrape estatesales.org, estatesales.net, estatesale-finder.com
-- Launch with 10K+ listings on Day 1
-- Always attribute + link back (drive them traffic)
-- **Why this works:** Buyers come for content, sellers see traffic
-
-**Phase 2: SEO (Long-Term Traffic)**
-- Target keywords: "estate sales near me" (90K/mo searches)
-- City pages: "estate sales Portland" × 1000 cities
-- Blog: "How to price estate sale items", "Best estate sale finds"
-- **Timeline:** 6-12 months to rank #1
-
-**Phase 3: Paid Ads (Fast Validation)**
-- Google Ads: "sell antiques online", "list estate sale"
-- Facebook: Target estate sale professionals, vintage dealers
-- Budget: $1K-3K/month for first 90 days
-- **Goal:** $20-50 CAC (Customer Acquisition Cost)
-
-**Phase 4: Partnerships (Credibility)**
-- Estate sale companies (white-label offering)
-- Antique shops (consignment partnerships)
-- Auction houses (integration partners)
-- **Goal:** 10-20 partnerships by Month 6
-
-**Phase 5: Community (Viral Loop)**
-- Seller success stories (Instagram, TikTok)
-- Treasure finds showcase (UGC content)
-- Referral program (invite friends, earn bonuses)
-- **Goal:** 20% of growth from referrals by Month 12
-
-### Seller Acquisition (First 100 is Everything)
-
-**Tier 1: Manual Outreach (First 10 sellers)**
-- Cold email eBay sellers (scrape emails, pitch lower fees)
-- Craigslist ads: "Sell your collectibles online"
-- Facebook groups: Vintage collectors, estate sale pros
-- In-person: Visit Portland antique shops
-
-**Tier 2: Local Partnerships (Next 40 sellers)**
-- Partner with estate sale companies (white-label)
-- Antique shops (consignment deals)
-- Flea market vendors (weekend sellers)
-- **Pitch:** Free for 6 months, 5% fees after (vs. eBay's 13%)
-
-**Tier 3: Paid Acquisition (Next 50 sellers)**
-- Google/Facebook ads targeting sellers
-- Content marketing (SEO blog posts)
-- YouTube: "How to sell collectibles online"
-- **CAC target:** $20-50 per seller
-
-**Retention Strategy:**
-- Onboarding: AI chat guides sellers (90% completion)
-- Success metrics: Show sellers their traffic, bids, earnings
-- Weekly emails: "Your shop had 50 views this week"
-- Community: Seller forum, success stories, tips
+#### Advertising
+- [ ] Sponsored listing slots
+- [ ] Banner ad system
+- [ ] Professional directory ads
 
 ---
 
-## Success Metrics
+## 🛠️ Technical Improvements
 
-### North Star Metric
-**Monthly Gross Merchandise Value (GMV)**
-- Month 1: $10K
-- Month 3: $50K
-- Month 6: $200K
-- Month 12: $1M
+### Infrastructure
+- [ ] Set up CI/CD pipeline (GitHub Actions)
+- [ ] Automated testing on PR
+- [ ] Staging environment
+- [ ] Production deployment (Cloud Run + Cloud SQL)
+- [ ] CDN for images (Cloud Storage + CDN)
+- [ ] Monitoring & logging (Cloud Logging)
 
-### Key Metrics (90-Day Goals)
+### Performance
+- [ ] Redis caching optimization
+- [ ] Database query optimization
+- [ ] Image optimization & lazy loading
+- [ ] Implement pagination on all list views
+- [ ] Add database indexes for common queries
 
-**Sellers:**
-- Total sellers: 100
-- Active sellers (listed ≥1 item in 30 days): 70
-- Retention (month-over-month): 70%
-- Avg items per seller: 5
-- Avg revenue per seller: $500/month
+### Security
+- [ ] Rate limiting
+- [ ] Input validation & sanitization
+- [ ] CSRF protection
+- [ ] SQL injection prevention (already using parameterized queries)
+- [ ] XSS prevention
+- [ ] Security headers
 
-**Buyers:**
-- Monthly active users: 5,000
-- Registered users: 1,000
-- Conversion (visitor → bidder): 10%
-- Repeat buyers: 40%
-
-**Transactions:**
-- Monthly transactions: 100+
-- Average order value: $150
-- Take rate (commission %): 7%
-- Transaction success rate: 95%
-
-**Platform:**
-- Monthly GMV: $50K
-- Revenue (commissions + subscriptions): $5K
-- Burn rate: <$2K/month (bootstrapped)
-- Runway: 12+ months
-
-### Product-Market Fit Indicators
-
-**Strong PMF signals:**
-- ✅ 70%+ seller retention month-over-month
-- ✅ 40%+ organic growth (referrals, word-of-mouth)
-- ✅ Sellers asking "When can I upgrade to Pro?"
-- ✅ Buyers checking daily for new items
-- ✅ GMV doubling every 2-3 months
-
-**Weak PMF signals:**
-- ❌ Sellers list 1-2 items then churn
-- ❌ Low transaction volume (<50/month)
-- ❌ All growth is paid (no organic)
-- ❌ Negative reviews, complaints
-- ❌ GMV flat or declining
-
-**If strong PMF by Month 6 → Raise funding or scale bootstrap**
-**If weak PMF by Month 6 → Pivot or shut down**
+### Code Quality
+- [ ] Increase test coverage to 80%+
+- [ ] Add E2E tests (Playwright)
+- [ ] Code linting & formatting (golangci-lint, ESLint)
+- [ ] API documentation (Swagger/OpenAPI)
+- [ ] Add logging throughout application
 
 ---
 
-## Risk Mitigation
+## 📱 Future Enhancements
 
-### Risk 1: Can't Get First 100 Sellers (60% probability)
+### Mobile
+- [ ] Progressive Web App (PWA) support
+- [ ] Mobile-optimized UI
+- [ ] Native mobile app (React Native?)
 
-**Mitigation:**
-- Start with aggregation (instant inventory)
-- Offer free Pro for 6 months (remove friction)
-- Manual outreach (10 sellers personally onboarded)
-- Local-first (Portland → Seattle → SF)
-- Lower bar: Accept 50 sellers as "good enough" to continue
-
-**Kill criteria:** If <50 sellers by Day 90 → Shut down
-
-### Risk 2: Traffic Acquisition Too Expensive
-
-**Mitigation:**
-- SEO (free, long-term)
-- Scraping = free inventory (sellers come for traffic)
-- Partnerships (estate sale companies drive traffic)
-- Content marketing (blog, YouTube)
-- Target CAC: <$50/seller (if higher, pause paid ads)
-
-### Risk 3: ChatGPT/AI Disruption
-
-**Mitigation:**
-- Build transaction layer (ChatGPT can't process payments)
-- Community features (shops, followers, reviews)
-- Proprietary data (exclusive seller listings)
-- Become infrastructure (ChatGPT links TO us)
-- Move fast (6-12 month window before AI gets good)
-
-### Risk 4: Regulatory/Legal (Scraping, Payments)
-
-**Mitigation:**
-- Robots.txt compliance
-- Attribution + deep linking (drive competitors traffic)
-- DMCA policy (takedown on request)
-- Stripe Connect (handles compliance)
-- Legal review before launch
-
-### Risk 5: Founder Burnout
-
-**Mitigation:**
-- 90-day validation checkpoints (assess, don't grind forever)
-- Set kill criteria upfront (no emotional decisions)
-- Focus on one metric (100 sellers)
-- Celebrate small wins
-- If not working by Month 6 → Move on
+### Advanced Features
+- [ ] AI-powered image recognition (detect valuable items)
+- [ ] Price estimation based on historical data
+- [ ] Automated listing categorization
+- [ ] Multi-language support
+- [ ] SMS notifications
 
 ---
 
-## Timeline Summary
+## 🐛 Known Issues
 
-| Phase | Duration | Goal | Success Metric |
-|-------|----------|------|----------------|
-| **MVP** | Weeks 1-4 | Launch with aggregated listings | 10K+ listings live |
-| **Validation** | Weeks 5-8 | Get 10 sellers, validate transactions | 10 sellers, 10 transactions |
-| **Local Growth** | Weeks 9-12 | 100 sellers in Portland/PNW | 100 sellers, $50K GMV |
-| **Regional Expansion** | Months 4-6 | 500 sellers, 5 cities | 500 sellers, $200K GMV |
-| **National Scale** | Months 7-12 | 2,500 sellers, 20 cities | $1M GMV, fundraise or profitable |
+1. ~~**Scraper Tests**: 2/6 integration tests failing (data mismatch issue)~~ ✅ **FIXED**
+2. **Frontend**: Needs update for new backend field names (`event_type`, `event_hours`)
+3. **Redis**: Not configured in Docker Compose (caching currently uses Upstash Redis)
 
 ---
 
-## Realistic Outcomes
+## 📊 Success Metrics
 
-**Scenario 1: Failure (60%)**
-- Can't get 100 sellers by Day 90
-- Shut down, move on
-- **Time lost:** 3-6 months
+### MVP Launch Goals
+- [ ] 100+ active listings
+- [ ] 50+ registered sellers
+- [ ] 1,000+ monthly visitors
+- [ ] 95%+ uptime
 
-**Scenario 2: Lifestyle Business (25%)**
-- Hit 500-1,000 sellers
-- $10K-50K/month revenue
-- **Outcome:** Keep running, good income
-
-**Scenario 3: Acquisition (12%)**
-- Hit 5,000-10,000 sellers
-- $500K-2M ARR
-- **Outcome:** Sell for $3M-10M
-
-**Scenario 4: VC Scale (3%)**
-- Hit 50,000+ sellers
-- $10M+ ARR
-- **Outcome:** Series A, $50M-500M exit
-
-**Expected Value: $4.1M** (probability-weighted)
+### Growth Goals (6 months)
+- [ ] 500+ active listings
+- [ ] 200+ registered sellers
+- [ ] 10,000+ monthly visitors
+- [ ] 100+ paid featured listings
 
 ---
 
-## Next Steps (Week 1)
-
-**Day 1-2:**
-- [ ] Finalize marketplace database schema (shops, items, bids, transactions)
-- [ ] Set up Stripe Connect test account
-- [ ] Design AI listing creator flow (Figma/wireframes)
-
-**Day 3-4:**
-- [ ] Build web scraper (estatesales.org priority)
-- [ ] Implement auction items CRUD API
-- [ ] Create seller shop pages UI
-
-**Day 5-7:**
-- [ ] GPT-4 Vision integration (item analysis)
-- [ ] AI listing creator chat interface
-- [ ] Test end-to-end: List item via AI → Goes live → Can be bid on
-
-**Goal:** By Day 7, sellers can list items via AI chat in <3 minutes
-
----
-
-**Last Updated:** January 2025
-**Status:** Phase 0 (Foundation) → Moving to Phase 1 (MVP)
-**Confidence Level:** 15-25% (realistic VC assessment)
-**Key Decision Point:** Day 90 (100 sellers or kill)
+**Last Updated:** 2025-10-27

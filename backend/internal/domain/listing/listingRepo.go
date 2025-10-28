@@ -13,9 +13,9 @@ type Repository interface {
 
 	// Image operations
 	AddImage(image *ListingImage) error
-	GetImagesBySaleID(saleID int) ([]ListingImage, error)
+	GetImagesByListingID(listingID int) ([]ListingImage, error)
 	DeleteImage(imageID int) error
-	SetPrimaryImage(imageID int, saleID int) error
+	SetPrimaryImage(imageID int, listingID int) error
 
 	// External listing operations
 	UpsertExternalSale(listing *Listing) error

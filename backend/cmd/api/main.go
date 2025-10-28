@@ -63,11 +63,11 @@ func main() {
 	log.Println("Database connection established")
 
 	// Initialize repositories
-	saleRepo := postgres.NewSaleRepository(db)
+	listingRepo := postgres.NewListingRepository(db)
 	userRepo := postgres.NewUserRepository(db)
 
 	// Initialize services
-	saleService := listing.NewService(saleRepo)
+	listingService := listing.NewService(listingRepo)
 	userService := user.NewService(userRepo)
 
 	// Initialize Redis cache
@@ -75,11 +75,11 @@ func main() {
 	defer redisClient.Close()
 
 	// Initialize scraper service (with repository for hybrid storage)
-	scraperService := scraper.NewScraperService(redisClient, saleRepo)
+	scraperService := scraper.NewScraperService(redisClient, listingRepo)
 
 	// Initialize handlers
-	saleHandler := controllers.NewSaleHandler(saleService, userService)
-	saleHandler.SetScraperService(scraperService)
+	listingHandler := controllers.NewListingHandler(listingService, userService)
+	listingHandler.SetScraperService(scraperService)
 	userHandler := controllers.NewUserHandler(userService)
 
 	// Set up the router using stdlib http.ServeMux
@@ -104,7 +104,7 @@ func main() {
 	// Sales - Public browsing (owned + scraped)
 	mux.Handle("/api/sales", corsMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
-			saleHandler.GetAggregatedSales(w, r)
+			listingHandler.GetAggregatedSales(w, r)
 		} else {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
@@ -116,7 +116,7 @@ func main() {
 		path := r.URL.Path
 		if strings.HasPrefix(path, "/api/sales/") && !strings.Contains(strings.TrimPrefix(path, "/api/sales/"), "/") {
 			if r.Method == http.MethodGet {
-				saleHandler.GetByID(w, r)
+				listingHandler.GetByID(w, r)
 			} else {
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			}
@@ -135,7 +135,7 @@ func main() {
 	// Sales - Create (authenticated sellers only)
 	mux.Handle("/api/sales/create", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			saleHandler.Create(w, r)
+			listingHandler.Create(w, r)
 		} else {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
@@ -144,7 +144,7 @@ func main() {
 	// My Sales - Get user's own sales
 	mux.Handle("/api/my-sales", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
-			saleHandler.GetMySales(w, r)
+			listingHandler.GetMySales(w, r)
 		} else {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
@@ -153,7 +153,7 @@ func main() {
 	// Update sale
 	mux.Handle("/api/sales/update/", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPut {
-			saleHandler.Update(w, r)
+			listingHandler.Update(w, r)
 		} else {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
@@ -162,7 +162,7 @@ func main() {
 	// Delete sale
 	mux.Handle("/api/sales/delete/", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodDelete {
-			saleHandler.Delete(w, r)
+			listingHandler.Delete(w, r)
 		} else {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
@@ -171,7 +171,7 @@ func main() {
 	// Add image to sale
 	mux.Handle("/api/sales/images/", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			saleHandler.AddImage(w, r)
+			listingHandler.AddImage(w, r)
 		} else {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}

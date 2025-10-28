@@ -36,9 +36,9 @@ func NewScraperService(redisClient *cache.RedisClient, repo listing.Repository) 
 	}
 }
 
-// GetSalesByLocation returns sales for a city/state (cached or scraped)
+// GetListingsByLocation returns sales for a city/state (cached or scraped)
 // Implements 3-tier strategy: Redis → PostgreSQL → Scrape
-func (s *ScraperService) GetSalesByLocation(city, state string) ([]listing.ScrapedListing, error) {
+func (s *ScraperService) GetListingsByLocation(city, state string) ([]listing.ScrapedListing, error) {
 	cacheKey := s.getCacheKey(city, state)
 
 	// 1. Try Redis cache first (fastest)
@@ -75,21 +75,21 @@ func (s *ScraperService) GetSalesByLocation(city, state string) ([]listing.Scrap
 				needsRescrape = true // Fallback to scraping
 			} else if len(dbSales) > 0 {
 				// Convert Listing to ScrapedListing
-				scrapedSales := make([]listing.ScrapedListing, len(dbSales))
+				scrapedListings := make([]listing.ScrapedListing, len(dbSales))
 				for i, s := range dbSales {
-					scrapedSales[i] = s.ToScrapedListing()
+					scrapedListings[i] = s.ToScrapedListing()
 				}
 
 				// Re-cache in Redis
 				if s.cache.IsEnabled() {
-					if err := s.cache.Set(cacheKey, scrapedSales, s.cacheTTL); err != nil {
+					if err := s.cache.Set(cacheKey, scrapedListings, s.cacheTTL); err != nil {
 						log.Printf("Warning: Failed to re-cache from PostgreSQL: %v", err)
 					} else {
-						log.Printf("✓ Re-cached %d sales from PostgreSQL", len(scrapedSales))
+						log.Printf("✓ Re-cached %d sales from PostgreSQL", len(scrapedListings))
 					}
 				}
 
-				return scrapedSales, nil
+				return scrapedListings, nil
 			} else {
 				log.Printf("Warning: PostgreSQL returned 0 sales, will re-scrape")
 				needsRescrape = true
@@ -128,13 +128,18 @@ func (s *ScraperService) GetSalesByLocation(city, state string) ([]listing.Scrap
 		// 5. Persist to PostgreSQL (converts ScrapedListing → Sale)
 		if s.repo != nil {
 			log.Printf("→ Persisting %d sales to PostgreSQL...", len(sales))
+			successCount := 0
+			failCount := 0
 			for _, scraped := range sales {
 				saleEntity := scraped.ToSale()
 				if err := s.repo.UpsertExternalSale(&saleEntity); err != nil {
-					log.Printf("Warning: Failed to persist sale %s: %v", scraped.ExternalID, err)
+					log.Printf("✗ FAILED to persist sale %s: %v", scraped.ExternalID, err)
+					failCount++
+				} else {
+					successCount++
 				}
 			}
-			log.Printf("✓ Persisted %d sales to PostgreSQL", len(sales))
+			log.Printf("✓ Persisted %d/%d sales to PostgreSQL (failed: %d)", successCount, len(sales), failCount)
 		}
 
 		// 6. Store in Redis cache

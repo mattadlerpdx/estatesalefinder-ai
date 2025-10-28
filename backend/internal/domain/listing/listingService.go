@@ -10,13 +10,13 @@ type Service struct {
 	repo Repository
 }
 
-// NewService creates a new sale service
+// NewService creates a new listing service
 func NewService(repo Repository) *Service {
 	return &Service{repo: repo}
 }
 
-// CreateSale creates a new sale listing
-func (s *Service) CreateSale(l *Listing) error {
+// CreateListing creates a new listing listing
+func (s *Service) CreateListing(l *Listing) error {
 	// Validate required fields
 	if l.Title == "" {
 		return fmt.Errorf("title is required")
@@ -35,8 +35,8 @@ func (s *Service) CreateSale(l *Listing) error {
 	if l.Status == "" {
 		l.Status = "draft"
 	}
-	if l.SaleType == "" {
-		l.SaleType = "estate_sale"
+	if l.EventType == "" {
+		l.EventType = "estate_sale"
 	}
 	if l.ListingTier == "" {
 		l.ListingTier = "basic"
@@ -51,15 +51,15 @@ func (s *Service) CreateSale(l *Listing) error {
 	return s.repo.Create(l)
 }
 
-// GetSaleByID retrieves a sale by ID and increments view count
-func (s *Service) GetSaleByID(id int) (*Listing, error) {
+// GetListingByID retrieves a listing by ID and increments view count
+func (s *Service) GetListingByID(id int) (*Listing, error) {
 	l, err := s.repo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
 	// Load images
-	images, err := s.repo.GetImagesBySaleID(id)
+	images, err := s.repo.GetImagesByListingID(id)
 	if err == nil {
 		l.Images = images
 	}
@@ -70,8 +70,8 @@ func (s *Service) GetSaleByID(id int) (*Listing, error) {
 	return l, nil
 }
 
-// GetAllSales retrieves sales with optional filters
-func (s *Service) GetAllSales(filters ListingFilters) ([]Listing, error) {
+// GetAllListings retrieves sales with optional filters
+func (s *Service) GetAllListings(filters ListingFilters) ([]Listing, error) {
 	// Set default pagination
 	if filters.Limit == 0 {
 		filters.Limit = 20
@@ -87,7 +87,7 @@ func (s *Service) GetAllSales(filters ListingFilters) ([]Listing, error) {
 
 	// Load images for each listing
 	for i := range listings {
-		images, err := s.repo.GetImagesBySaleID(listings[i].ID)
+		images, err := s.repo.GetImagesByListingID(listings[i].ID)
 		if err == nil {
 			listings[i].Images = images
 		}
@@ -96,8 +96,8 @@ func (s *Service) GetAllSales(filters ListingFilters) ([]Listing, error) {
 	return listings, nil
 }
 
-// GetSellerSales retrieves all sales for a specific seller
-func (s *Service) GetSellerSales(sellerID int) ([]Listing, error) {
+// GetSellerListings retrieves all sales for a specific seller
+func (s *Service) GetSellerListings(sellerID int) ([]Listing, error) {
 	listings, err := s.repo.GetBySellerID(sellerID)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (s *Service) GetSellerSales(sellerID int) ([]Listing, error) {
 
 	// Load images for each listing
 	for i := range listings {
-		images, err := s.repo.GetImagesBySaleID(listings[i].ID)
+		images, err := s.repo.GetImagesByListingID(listings[i].ID)
 		if err == nil {
 			listings[i].Images = images
 		}
@@ -114,11 +114,11 @@ func (s *Service) GetSellerSales(sellerID int) ([]Listing, error) {
 	return listings, nil
 }
 
-// UpdateSale updates an existing sale
-func (s *Service) UpdateSale(l *Listing) error {
+// UpdateListing updates an existing sale
+func (s *Service) UpdateListing(l *Listing) error {
 	// Validate
 	if l.ID == 0 {
-		return fmt.Errorf("sale ID is required")
+		return fmt.Errorf("listing ID is required")
 	}
 	if l.Title == "" {
 		return fmt.Errorf("title is required")
@@ -131,15 +131,15 @@ func (s *Service) UpdateSale(l *Listing) error {
 	return s.repo.Update(l)
 }
 
-// DeleteSale deletes a sale
-func (s *Service) DeleteSale(id int) error {
+// DeleteListing deletes a sale
+func (s *Service) DeleteListing(id int) error {
 	return s.repo.Delete(id)
 }
 
-// AddSaleImage adds an image to a sale
-func (s *Service) AddSaleImage(image *ListingImage) error {
-	if image.SaleID == 0 {
-		return fmt.Errorf("sale ID is required")
+// AddListingImage adds an image to a listing
+func (s *Service) AddListingImage(image *ListingImage) error {
+	if image.ListingID == 0 {
+		return fmt.Errorf("listing ID is required")
 	}
 	if image.ImageURL == "" {
 		return fmt.Errorf("image URL is required")
@@ -149,12 +149,12 @@ func (s *Service) AddSaleImage(image *ListingImage) error {
 	return s.repo.AddImage(image)
 }
 
-// DeleteSaleImage deletes an image
-func (s *Service) DeleteSaleImage(imageID int) error {
+// DeleteListingImage deletes an image
+func (s *Service) DeleteListingImage(imageID int) error {
 	return s.repo.DeleteImage(imageID)
 }
 
 // SetPrimaryImage sets an image as the primary image for a sale
-func (s *Service) SetPrimaryImage(imageID int, saleID int) error {
-	return s.repo.SetPrimaryImage(imageID, saleID)
+func (s *Service) SetPrimaryImage(imageID int, listingID int) error {
+	return s.repo.SetPrimaryImage(imageID, listingID)
 }

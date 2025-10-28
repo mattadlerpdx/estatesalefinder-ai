@@ -19,7 +19,7 @@ import (
 type ListingIntegrationTestSuite struct {
 	suite.Suite
 	db      *sql.DB
-	repo    *postgres.SaleRepository
+	repo    *postgres.ListingRepository
 	service *listing.Service
 }
 
@@ -37,7 +37,7 @@ func (suite *ListingIntegrationTestSuite) SetupSuite() {
 	require.NoError(suite.T(), db.Ping(), "Failed to ping database")
 
 	suite.db = db
-	suite.repo = postgres.NewSaleRepository(db)
+	suite.repo = postgres.NewListingRepository(db)
 	suite.service = listing.NewService(suite.repo)
 }
 
@@ -76,33 +76,35 @@ func (suite *ListingIntegrationTestSuite) TestListingCRUD() {
 
 	// Create a test listing
 	now := time.Now()
+	sellerID := 10 // Test seller created in setup
 	testListing := listing.Listing{
-		ListingType:  "owned",
-		Title:        "Test: Estate Sale - Antiques & Collectibles",
-		Description:  "Beautiful collection of vintage items, furniture, and collectibles",
-		AddressLine1: "123 Main Street",
-		City:         "Portland",
-		State:        "OR",
-		ZipCode:      "97201",
-		StartDate:    now.Add(7 * 24 * time.Hour),
-		EndDate:      now.Add(9 * 24 * time.Hour),
-		SaleType:     "estate_sale",
-		Status:       "draft",
-		ListingTier:  "basic",
+		ListingType:   "owned",
+		SellerID:      &sellerID,
+		Title:         "Test: Estate Sale - Antiques & Collectibles",
+		Description:   "Beautiful collection of vintage items, furniture, and collectibles",
+		AddressLine1:  "123 Main Street",
+		City:          "Portland",
+		State:         "OR",
+		ZipCode:       "97201",
+		StartDate:     now.Add(7 * 24 * time.Hour),
+		EndDate:       now.Add(9 * 24 * time.Hour),
+		EventType:      "estate_sale",
+		Status:        "draft",
+		ListingTier:   "basic",
 		PaymentStatus: "unpaid",
 	}
 
 	// Test CREATE
-	err := suite.service.CreateSale(&testListing)
-	require.NoError(suite.T(), err, "CreateSale should succeed")
+	err := suite.service.CreateListing(&testListing)
+	require.NoError(suite.T(), err, "CreateListing should succeed")
 	assert.Greater(suite.T(), testListing.ID, 0, "Listing should have ID assigned")
 	suite.T().Logf("✓ Created listing with ID: %d", testListing.ID)
 
 	createdID := testListing.ID
 
 	// Test READ (GetByID)
-	retrieved, err := suite.service.GetSaleByID(createdID)
-	require.NoError(suite.T(), err, "GetSaleByID should succeed")
+	retrieved, err := suite.service.GetListingByID(createdID)
+	require.NoError(suite.T(), err, "GetListingByID should succeed")
 	assert.Equal(suite.T(), testListing.Title, retrieved.Title, "Title should match")
 	assert.Equal(suite.T(), testListing.City, retrieved.City, "City should match")
 	assert.Equal(suite.T(), "draft", retrieved.Status, "Status should be draft")
@@ -113,25 +115,25 @@ func (suite *ListingIntegrationTestSuite) TestListingCRUD() {
 	retrieved.Title = "Test: UPDATED - Estate Sale"
 	retrieved.Status = "active"
 	retrieved.Description = "Updated description with more details"
-	err = suite.service.UpdateSale(retrieved)
-	require.NoError(suite.T(), err, "UpdateSale should succeed")
+	err = suite.service.UpdateListing(retrieved)
+	require.NoError(suite.T(), err, "UpdateListing should succeed")
 	suite.T().Logf("✓ Updated listing")
 
 	// Verify update
-	updated, err := suite.service.GetSaleByID(createdID)
-	require.NoError(suite.T(), err, "GetSaleByID after update should succeed")
+	updated, err := suite.service.GetListingByID(createdID)
+	require.NoError(suite.T(), err, "GetListingByID after update should succeed")
 	assert.Equal(suite.T(), "Test: UPDATED - Estate Sale", updated.Title, "Title should be updated")
 	assert.Equal(suite.T(), "active", updated.Status, "Status should be updated")
 	suite.T().Logf("✓ Verified update: %s", updated.Title)
 
 	// Test DELETE
-	err = suite.service.DeleteSale(createdID)
-	require.NoError(suite.T(), err, "DeleteSale should succeed")
+	err = suite.service.DeleteListing(createdID)
+	require.NoError(suite.T(), err, "DeleteListing should succeed")
 	suite.T().Logf("✓ Deleted listing")
 
 	// Verify deletion
-	_, err = suite.service.GetSaleByID(createdID)
-	assert.Error(suite.T(), err, "GetSaleByID after delete should fail")
+	_, err = suite.service.GetListingByID(createdID)
+	assert.Error(suite.T(), err, "GetListingByID after delete should fail")
 	suite.T().Logf("✓ Verified deletion")
 }
 
@@ -141,8 +143,10 @@ func (suite *ListingIntegrationTestSuite) TestListingWithImages() {
 
 	// Create a listing
 	now := time.Now()
+	sellerID := 10 // Test seller created in setup
 	testListing := listing.Listing{
 		ListingType:  "owned",
+		SellerID:     &sellerID,
 		Title:        "Test: Moving Sale with Photos",
 		Description:  "Everything must go!",
 		AddressLine1: "456 Oak Avenue",
@@ -151,32 +155,32 @@ func (suite *ListingIntegrationTestSuite) TestListingWithImages() {
 		ZipCode:      "97202",
 		StartDate:    now.Add(5 * 24 * time.Hour),
 		EndDate:      now.Add(7 * 24 * time.Hour),
-		SaleType:     "moving_sale",
+		EventType:     "moving_sale",
 		Status:       "active",
 	}
 
-	err := suite.service.CreateSale(&testListing)
+	err := suite.service.CreateListing(&testListing)
 	require.NoError(suite.T(), err)
 	suite.T().Logf("✓ Created listing: %s (ID: %d)", testListing.Title, testListing.ID)
 
 	// Add images
 	image1 := listing.ListingImage{
-		SaleID:       testListing.ID,
+		ListingID:    testListing.ID,
 		ImageURL:     "https://example.com/images/photo1.jpg",
 		IsPrimary:    false,
 		DisplayOrder: 1,
 	}
-	err = suite.service.AddSaleImage(&image1)
-	require.NoError(suite.T(), err, "AddSaleImage should succeed")
+	err = suite.service.AddListingImage(&image1)
+	require.NoError(suite.T(), err, "AddListingImage should succeed")
 	suite.T().Logf("✓ Added image 1")
 
 	image2 := listing.ListingImage{
-		SaleID:       testListing.ID,
+		ListingID:    testListing.ID,
 		ImageURL:     "https://example.com/images/photo2.jpg",
 		IsPrimary:    false,
 		DisplayOrder: 2,
 	}
-	err = suite.service.AddSaleImage(&image2)
+	err = suite.service.AddListingImage(&image2)
 	require.NoError(suite.T(), err)
 	suite.T().Logf("✓ Added image 2")
 
@@ -186,7 +190,7 @@ func (suite *ListingIntegrationTestSuite) TestListingWithImages() {
 	suite.T().Logf("✓ Set image 1 as primary")
 
 	// Retrieve listing with images
-	retrieved, err := suite.service.GetSaleByID(testListing.ID)
+	retrieved, err := suite.service.GetListingByID(testListing.ID)
 	require.NoError(suite.T(), err)
 	assert.Len(suite.T(), retrieved.Images, 2, "Should have 2 images")
 
@@ -202,18 +206,18 @@ func (suite *ListingIntegrationTestSuite) TestListingWithImages() {
 	suite.T().Logf("✓ Verified images (primary: %s)", image1.ImageURL)
 
 	// Delete image
-	err = suite.service.DeleteSaleImage(image2.ID)
-	require.NoError(suite.T(), err, "DeleteSaleImage should succeed")
+	err = suite.service.DeleteListingImage(image2.ID)
+	require.NoError(suite.T(), err, "DeleteListingImage should succeed")
 	suite.T().Logf("✓ Deleted image 2")
 
 	// Verify deletion
-	retrieved, err = suite.service.GetSaleByID(testListing.ID)
+	retrieved, err = suite.service.GetListingByID(testListing.ID)
 	require.NoError(suite.T(), err)
 	assert.Len(suite.T(), retrieved.Images, 1, "Should have 1 image after deletion")
 	suite.T().Logf("✓ Verified image deletion")
 
 	// Cleanup
-	suite.service.DeleteSale(testListing.ID)
+	suite.service.DeleteListing(testListing.ID)
 }
 
 // TestListingFilters tests filtering and pagination
@@ -221,52 +225,56 @@ func (suite *ListingIntegrationTestSuite) TestListingFilters() {
 	suite.T().Log("=== Test: Listing Filters and Pagination ===")
 
 	now := time.Now()
+	sellerID := 10 // Test seller created in setup
 
 	// Create multiple test listings
 	listings := []listing.Listing{
 		{
-			ListingType: "owned",
-			Title:       "Test: Portland Estate Sale",
+			ListingType:  "owned",
+			SellerID:     &sellerID,
+			Title:        "Test: Portland Estate Sale",
 			AddressLine1: "100 SW Broadway",
-			City:        "Portland",
-			State:       "OR",
-			ZipCode:     "97205",
-			StartDate:   now.Add(1 * 24 * time.Hour),
-			EndDate:     now.Add(2 * 24 * time.Hour),
-			SaleType:    "estate_sale",
-			Status:      "active",
-			Featured:    true,
+			City:         "Portland",
+			State:        "OR",
+			ZipCode:      "97205",
+			StartDate:    now.Add(1 * 24 * time.Hour),
+			EndDate:      now.Add(2 * 24 * time.Hour),
+			EventType:     "estate_sale",
+			Status:       "active",
+			Featured:     true,
 		},
 		{
-			ListingType: "owned",
-			Title:       "Test: Portland Moving Sale",
+			ListingType:  "owned",
+			SellerID:     &sellerID,
+			Title:        "Test: Portland Moving Sale",
 			AddressLine1: "200 NW Couch",
-			City:        "Portland",
-			State:       "OR",
-			ZipCode:     "97209",
-			StartDate:   now.Add(3 * 24 * time.Hour),
-			EndDate:     now.Add(4 * 24 * time.Hour),
-			SaleType:    "moving_sale",
-			Status:      "active",
-			Featured:    false,
+			City:         "Portland",
+			State:        "OR",
+			ZipCode:      "97209",
+			StartDate:    now.Add(3 * 24 * time.Hour),
+			EndDate:      now.Add(4 * 24 * time.Hour),
+			EventType:     "moving_sale",
+			Status:       "active",
+			Featured:     false,
 		},
 		{
-			ListingType: "owned",
-			Title:       "Test: Seattle Estate Sale",
+			ListingType:  "owned",
+			SellerID:     &sellerID,
+			Title:        "Test: Seattle Estate Sale",
 			AddressLine1: "300 Pike Street",
-			City:        "Seattle",
-			State:       "WA",
-			ZipCode:     "98101",
-			StartDate:   now.Add(5 * 24 * time.Hour),
-			EndDate:     now.Add(6 * 24 * time.Hour),
-			SaleType:    "estate_sale",
-			Status:      "active",
-			Featured:    false,
+			City:         "Seattle",
+			State:        "WA",
+			ZipCode:      "98101",
+			StartDate:    now.Add(5 * 24 * time.Hour),
+			EndDate:      now.Add(6 * 24 * time.Hour),
+			EventType:     "estate_sale",
+			Status:       "active",
+			Featured:     false,
 		},
 	}
 
 	for i := range listings {
-		err := suite.service.CreateSale(&listings[i])
+		err := suite.service.CreateListing(&listings[i])
 		require.NoError(suite.T(), err)
 		suite.T().Logf("✓ Created: %s", listings[i].Title)
 	}
@@ -276,7 +284,7 @@ func (suite *ListingIntegrationTestSuite) TestListingFilters() {
 		City:  "Portland",
 		Limit: 10,
 	}
-	results, err := suite.service.GetAllSales(filters)
+	results, err := suite.service.GetAllListings(filters)
 	require.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(results), 2, "Should find at least 2 Portland listings")
 	for _, l := range results {
@@ -291,17 +299,17 @@ func (suite *ListingIntegrationTestSuite) TestListingFilters() {
 		State: "OR",
 		Limit: 10,
 	}
-	results, err = suite.service.GetAllSales(filters)
+	results, err = suite.service.GetAllListings(filters)
 	require.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(results), 2, "Should find at least 2 OR listings")
 	suite.T().Logf("✓ State filter: Found %d Oregon listings", len(results))
 
 	// Test 3: Filter by sale type
 	filters = listing.ListingFilters{
-		SaleType: "estate_sale",
+		EventType: "estate_sale",
 		Limit:    10,
 	}
-	results, err = suite.service.GetAllSales(filters)
+	results, err = suite.service.GetAllListings(filters)
 	require.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(results), 2, "Should find at least 2 estate sales")
 	suite.T().Logf("✓ Sale type filter: Found %d estate sales", len(results))
@@ -312,7 +320,7 @@ func (suite *ListingIntegrationTestSuite) TestListingFilters() {
 		Featured: &featured,
 		Limit:    10,
 	}
-	results, err = suite.service.GetAllSales(filters)
+	results, err = suite.service.GetAllListings(filters)
 	require.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(results), 1, "Should find at least 1 featured listing")
 	suite.T().Logf("✓ Featured filter: Found %d featured listings", len(results))
@@ -322,20 +330,20 @@ func (suite *ListingIntegrationTestSuite) TestListingFilters() {
 		Limit:  1,
 		Offset: 0,
 	}
-	page1, err := suite.service.GetAllSales(filters)
+	page1, err := suite.service.GetAllListings(filters)
 	require.NoError(suite.T(), err)
 	assert.LessOrEqual(suite.T(), len(page1), 1, "Should return at most 1 result")
 	suite.T().Logf("✓ Pagination: Page 1 has %d results", len(page1))
 
 	filters.Offset = 1
-	page2, err := suite.service.GetAllSales(filters)
+	page2, err := suite.service.GetAllListings(filters)
 	require.NoError(suite.T(), err)
 	assert.LessOrEqual(suite.T(), len(page2), 1, "Should return at most 1 result")
 	suite.T().Logf("✓ Pagination: Page 2 has %d results", len(page2))
 
 	// Cleanup
 	for _, l := range listings {
-		suite.service.DeleteSale(l.ID)
+		suite.service.DeleteListing(l.ID)
 	}
 }
 

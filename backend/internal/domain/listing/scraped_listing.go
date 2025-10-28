@@ -67,7 +67,7 @@ type AggregatedListing struct {
 	} `json:"source,omitempty"`
 
 	// Owned sale data (only if IsScraped = false)
-	SaleType      string `json:"sale_type,omitempty"`
+	EventType      string `json:"event_type,omitempty"`
 	Status        string `json:"status,omitempty"`
 	ViewCount     int    `json:"view_count,omitempty"`
 }
@@ -105,7 +105,7 @@ func (s *Listing) ToAggregatedSale() *AggregatedListing {
 		ThumbnailURL: thumbnailURL,
 		ImageURLs:    imageURLs,
 		IsScraped:    false,
-		SaleType:     s.SaleType,
+		EventType:     s.EventType,
 		Status:       s.Status,
 		ViewCount:    s.ViewCount,
 	}

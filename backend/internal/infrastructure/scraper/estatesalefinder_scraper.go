@@ -73,11 +73,11 @@ func (s *EstateSaleFinderScraper) ScrapePortlandSales() ([]listing.ScrapedListin
 // parseSaleRow extracts data from a single sale row
 func (s *EstateSaleFinderScraper) parseSaleRow(sel *goquery.Selection) *listing.ScrapedListing {
 	// Get sale ID from id attribute (e.g., "sale15436")
-	saleID, exists := sel.Attr("id")
-	if !exists || !strings.HasPrefix(saleID, "sale") {
+	listingID, exists := sel.Attr("id")
+	if !exists || !strings.HasPrefix(listingID, "sale") {
 		return nil
 	}
-	externalID := fmt.Sprintf("estatesale-finder-%s", strings.TrimPrefix(saleID, "sale"))
+	externalID := fmt.Sprintf("estatesale-finder-%s", strings.TrimPrefix(listingID, "sale"))
 
 	// Get provider/title
 	title := strings.TrimSpace(sel.Find("h5 a").First().Text())
