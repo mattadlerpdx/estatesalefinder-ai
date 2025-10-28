@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: estatesale-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: estatesale_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backend/migrations/001_initial_schema.sql:/docker-entrypoint-initdb.d/001_initial_schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - estatesale-network
+
+  # Backend API
+  backend:
+    image: golang:1.23-alpine
+    container_name: estatesale-backend
+    working_dir: /app
+    command: sh -c "go mod download && go run ./cmd/api"
+    environment:
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_NAME: estatesale_db
+      DB_PORT: 5432
+      PORT: 8080
+      APP_ENV: local
+      CORS_ALLOWED_ORIGIN: http://localhost:3000
+      REDIS_URL: ${REDIS_URL}
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount source code for hot reload
+      - ./backend:/app
+      # Mount Firebase credentials
+      - ./backend/credentials:/app/credentials
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - estatesale-network
+    restart: unless-stopped
+
+  # Frontend Next.js App
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: estatesale-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+      # Add Firebase config here
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source for hot reload
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+    networks:
+      - estatesale-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  estatesale-network:
+    driver: bridge

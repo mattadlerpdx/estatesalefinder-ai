@@ -1,0 +1,19 @@
+# === Environment Variables ===
+.env
+env_vars.yaml
+
+# === Firebase Credentials ===
+credentials/firebase-adminsdk.json
+
+# === Logs and Runtime ===
+*.log
+tmp/
+cache/
+
+# === Security Keys ===
+*.key
+*.pem
+
+# === OS/IDE Artifacts ===
+.DS_Store
+.vscode/

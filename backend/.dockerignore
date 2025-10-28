@@ -1,0 +1,29 @@
+# Environment files with secrets
+.env
+env_vars.yaml
+*.env
+*.env.*
+
+# Test files and data
+test/
+test-data/
+*_test.go
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+README.md
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/

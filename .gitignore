@@ -1,0 +1,124 @@
+# Environment files
+.env
+.env.local
+.env*.local
+*.env
+
+# Backend (Go)
+backend/bin/
+backend/pkg/
+backend/vendor/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+coverage.out
+
+# Frontend (Next.js)
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+frontend/node_modules/
+frontend/.DS_Store
+frontend/*.log
+frontend/.vercel
+frontend/.turbo
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.pnpm-debug.log*
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+/tmp/
+
+# Build artifacts
+dist/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test coverage
+coverage/
+*.cover
+*.coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.coverprofile
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Redis dump
+dump.rdb
+
+# Go modules cache (optional - comment out if you want to cache)
+# go.sum
+
+# Secrets and credentials
+serviceAccountKey.json
+credentials.json
+credentials/
+backend/credentials/
+frontend/credentials/
+*.pem
+*.key
+*.crt
+*.p12
+
+# Claude Code
+.claude/
+.claude-cache/
+
+# Downloaded dependencies
+/tmp/go*.tar.gz
